@@ -1,40 +1,53 @@
 package com.mosoft.filterdemo.app.ui
 
-import android.R.interpolator.linear
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaPlayer
-import android.media.audiofx.Equalizer
-import android.media.audiofx.PresetReverb
 import android.media.audiofx.Visualizer
 import android.net.Uri
 import android.os.Bundle
-import android.util.Pair
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.TextView
+import android.os.Environment
+import android.util.Log
+import android.view.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
+import be.tarsos.dsp.AudioDispatcher
+import be.tarsos.dsp.filters.LowPassFS
+import be.tarsos.dsp.io.TarsosDSPAudioFormat
+import be.tarsos.dsp.io.UniversalAudioInputStream
+import be.tarsos.dsp.io.android.AndroidFFMPEGLocator
+import be.tarsos.dsp.util.FFMPEGDownloader
+import be.tarsos.dsp.writer.WriterProcessor
 import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.baseFragment.baseFragment
 import com.mosoft.filterdemo.databinding.FragmentMainScreenBinding
+import javazoom.jl.decoder.Bitstream
+import javazoom.jl.decoder.SampleBuffer
+import java.io.*
 import java.lang.Integer.min
 import java.lang.Math.max
 
 
 class mainScreenFragment: baseFragment() {
 
+    var mBufferSize = 64000
+    var mOverlap = 32000
+
     lateinit var binding : FragmentMainScreenBinding
     lateinit var playerOriginal : MediaPlayer
     lateinit var playerFiltered : MediaPlayer
     lateinit var playerOriginalViz : Visualizer
     lateinit var playerFilteredViz : Visualizer
+    lateinit var tmpFileOriginal : File
+    lateinit var tmpFileFiltered : File
+    lateinit var mediaExtractor : MediaExtractor
+    lateinit var outputFile : RandomAccessFile
+    lateinit var mediaFormat : MediaFormat
+    lateinit var pcmArray : ShortArray
     var isPlaying = false //For Handling onPause and onResume continuity
 
     @SuppressLint("ClickableViewAccessibility")
@@ -46,46 +59,79 @@ class mainScreenFragment: baseFragment() {
         binding = DataBindingUtil
             .inflate(inflater, R.layout.fragment_main_screen, container, false)
 
-        binding.btnShowMenu.setOnClickListener {
-            if(binding.lyRightMenu.visibility == View.GONE) {
-                binding.lyRightMenu.visibility = View.VISIBLE
-            } else {
-                binding.lyRightMenu.visibility = View.GONE
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                binding.btnRightMenuClose.performClick()
             }
         }
 
+        tmpFileOriginal = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+                + "/"
+                + ""
+                + "Original.wav")
+        if(tmpFileOriginal.exists())
+            tmpFileOriginal.delete()
+        tmpFileOriginal.createNewFile()
+        tmpFileFiltered = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+                + "/"
+                + ""
+                + "Filter-Results.wav")
+        if(tmpFileFiltered.exists())
+            tmpFileFiltered.delete()
+        outputFile = RandomAccessFile(tmpFileFiltered.path, "rw")
+
+        //requireActivity().onBackPressedDispatcher.addCallback(this,callback)
+
+        //requireActivity().onBackPressedDispatcher.OnBackPressedCallback(false)
+
+        binding.btnShowMenu.setOnClickListener {
+            if(it.isClickable) {
+                binding.btnShowMenu.isClickable = false
+                binding.btnRightMenuClose.isClickable = true
+                binding.lyRightMenuMaster.visibility = View.VISIBLE
+                //requireActivity().onBackPressedDispatcher.hasEnabledCallbacks(true)
+            }
+        }
+
+        binding.btnRightMenuClose.setOnClickListener {
+            if(it.isClickable) {
+                binding.btnRightMenuClose.isClickable = false
+                binding.btnShowMenu.isClickable = true
+                binding.lyRightMenuMaster.visibility = View.GONE
+                //requireActivity().onBackPressedDispatcher.hasEnabledCallbacks(false)
+            }
+        }
+
+        binding.lyRightMenuOver.setOnClickListener {
+            binding.btnRightMenuClose.performClick()
+        }
+
+        //Player
+
         var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
+                Log.d("DEBUG HERE", "mUri Read")
                 val mUri : Uri = result.data?.data!!
 
-                //var tmp = setupAudio(mUri)
+                Log.d("DEBUG HERE", "crate file")
+                createFileFromStream(requireContext().contentResolver.openInputStream(mUri)!!,tmpFileOriginal)
+                Log.d("DEBUG HERE", "crate file done")
 
-                playerOriginal = MediaPlayer.create(context, mUri)
-                /*
-                playerOriginalViz = Visualizer(playerOriginal.audioSessionId)
-                playerOriginalViz.apply {
-                    measurementMode = Visualizer.MEASUREMENT_MODE_PEAK_RMS
-                    scalingMode = Visualizer.SCALING_MODE_NORMALIZED
-                    captureSize = Visualizer.getCaptureSizeRange()[0]
-                    enabled = true
-                }*/
+                mediaExtractor = MediaExtractor()
+                mediaExtractor.setDataSource(tmpFileOriginal.path)
+                mediaFormat = mediaExtractor.getTrackFormat(0)
+                Log.d("DEBUG HERE", "medexctr don")
 
-                //tmp = setupAudio(mUri)
+                setupAudio(tmpFileOriginal, 800f)
+                Log.d("DEBUG HERE", "setup audio don")
 
-                playerFiltered = MediaPlayer.create(context, mUri)
-                //playerFilteredViz = tmp.second
+                val originalUri = Uri.parse(tmpFileOriginal.path)
+                val filteredUri = Uri.parse(tmpFileFiltered.path)
 
-
-
-                //Test Effect
-                val aTmp = PresetReverb(0, playerFiltered.audioSessionId)
-                aTmp.preset = PresetReverb.PRESET_SMALLROOM
-                aTmp.enabled = true
-                //Test Effect
+                playerOriginal = MediaPlayer.create(context, originalUri)
+                playerFiltered = MediaPlayer.create(context, filteredUri)
 
                 playerOriginal.setVolume(0f,0f)
-
-                //MakeToast(mUri.path!!)    //DEBUG
             }
         }
 
@@ -96,6 +142,7 @@ class mainScreenFragment: baseFragment() {
         }
 
         binding.btnToggle.setOnTouchListener { _, motionEvent ->
+            playerFiltered.seekTo(playerOriginal.currentPosition)
             if(motionEvent.action == MotionEvent.ACTION_DOWN) {
                 playerOriginal.setVolume(1f,1f)
                 playerFiltered.setVolume(0f,0f)
@@ -110,6 +157,8 @@ class mainScreenFragment: baseFragment() {
 
             return@setOnTouchListener true
         }
+
+        //Media Control
 
         binding.btnPlayPause.setOnClickListener {
             if(isPlaying) {
@@ -157,18 +206,6 @@ class mainScreenFragment: baseFragment() {
         }
     }
 
-    fun setupAudio(audioUri : Uri) : Pair<MediaPlayer,Visualizer> {
-        var mMediaPlayer = MediaPlayer.create(context, audioUri)
-        var mVisualizer = Visualizer(mMediaPlayer.audioSessionId)
-
-        mVisualizer.measurementMode = Visualizer.MEASUREMENT_MODE_PEAK_RMS
-        mVisualizer.scalingMode = Visualizer.SCALING_MODE_NORMALIZED
-        mVisualizer.captureSize = Visualizer.getCaptureSizeRange()[0]
-        mVisualizer.enabled = true
-
-        return Pair.create(mMediaPlayer,mVisualizer)
-    }
-
     fun playMediaPlayer() {
         if(!isPlaying) {
             playerOriginal.start()
@@ -184,5 +221,81 @@ class mainScreenFragment: baseFragment() {
             playerFiltered.pause()
             isPlaying = false
         }
+    }
+
+    private fun decode(input : InputStream) {
+        val output = ArrayList<Short>(1024)
+        val bitstream = Bitstream(input)
+        val decoder = javazoom.jl.decoder.Decoder()
+        var total_ms = 0f
+        var nextNotify = -1f
+        while (true) {
+            val frameHeader: javazoom.jl.decoder.Header? = bitstream.readFrame()
+            if (frameHeader == null) {
+                break
+            } else {
+                total_ms += frameHeader.ms_per_frame()
+                val buffer: SampleBuffer =
+                    decoder.decodeFrame(frameHeader, bitstream) as SampleBuffer // CPU intense
+                val pcm: ShortArray = buffer.getBuffer()
+                var i = 0
+                while (i < pcm.size - 1) {
+                    val l = pcm[i]
+                    val r = pcm[i + 1]
+                    val mono = ((l + r) / 2f).toInt().toShort()
+                    output.add(mono) // RAM intense
+                    i += 2
+                }
+                pcmArray = pcm
+            }
+            bitstream.closeFrame()
+        }
+        bitstream.close()
+        val monoSamples = ShortArray(pcmArray.size / 2)
+        val HEADER_LENGTH = 22
+        var k = 0
+        for (i in monoSamples.indices) {
+            if (k > HEADER_LENGTH) {
+                monoSamples[i] = ((pcmArray[i * 2] + pcmArray[i * 2 + 1]) / 2).toShort()
+            }
+            k++
+        }
+    }
+
+    fun createFileFromStream(ins: InputStream, destination1: File?) {
+        try {
+            FileOutputStream(destination1).use { os ->
+                val buffer = ByteArray(mBufferSize)
+                var length: Int
+                while (ins.read(buffer).also { length = it } > 0) {
+                    os.write(buffer, 0, length)
+                }
+                os.flush()
+            }
+        } catch (ex: Exception) {
+            Log.d("Save File", ex.message!!)
+            ex.printStackTrace()
+        }
+    }
+
+    fun setupAudio(oriFile : File, fCut : Float) {
+
+        val fs = mediaFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE).toFloat()
+        val channel = mediaFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+
+        val audioFormat = TarsosDSPAudioFormat(fs, 16, channel, false, false)
+
+        val inputStream = FileInputStream(oriFile)
+        val audioStream = UniversalAudioInputStream(inputStream,audioFormat)
+        val audioDispatcher = AudioDispatcher(audioStream,mBufferSize,mOverlap)
+        val writer = WriterProcessor(audioFormat, outputFile)
+
+        audioDispatcher.addAudioProcessor(LowPassFS(fCut,fs))
+        audioDispatcher.addAudioProcessor(writer)
+        audioDispatcher.run()
+
+        val audioThread = Thread(audioDispatcher, "Audio Thread")
+
+        return
     }
 }

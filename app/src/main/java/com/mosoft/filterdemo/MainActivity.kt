@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.databinding.DataBindingUtil
+import be.tarsos.dsp.io.android.AndroidFFMPEGLocator
+import be.tarsos.dsp.util.FFMPEGDownloader
 import com.mosoft.filterdemo.app.ui.mainScreenFragment
 import com.mosoft.filterdemo.databinding.ActivityMainBinding
 
@@ -15,6 +17,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        FFMPEGDownloader()
+        AndroidFFMPEGLocator(this)
 
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
