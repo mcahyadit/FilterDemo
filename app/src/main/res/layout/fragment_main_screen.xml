@@ -17,15 +17,36 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_350sdp"
-                android:background="@color/greySpace_01"
+                android:background="@color/greySpace_02"
                 android:orientation="vertical">
 
-                <SeekBar
-                    android:id="@+id/ly_seekbar"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_8sdp"
+                    android:layout_height="@dimen/_20sdp"
                     android:layout_above="@+id/ly_media_control"
-                    android:layout_marginBottom="382dp" />
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_current"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="@dimen/_5sdp"
+                        android:text="0:00" />
+
+                    <SeekBar
+                        android:id="@+id/ly_seekbar"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/tv_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="@dimen/_5sdp"
+                        android:text="0:00" />
+
+                </LinearLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/ly_media_control"
@@ -37,8 +58,8 @@
                     <ImageView
                         style="@style/mediaPlayerButtons"
                         android:id="@+id/btn_play_pause"
-                        android:layout_width="@dimen/_30sdp"
-                        android:layout_height="@dimen/_30sdp"
+                        android:layout_width="@dimen/_36sdp"
+                        android:layout_height="@dimen/_36sdp"
                         android:src="@drawable/ic_baseline_play_arrow"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
@@ -86,52 +107,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:padding="0dp"
-                >
+                android:padding="0dp" >
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:id="@+id/ly_parameter_master"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
+                    android:paddingHorizontal="@dimen/_16sdp"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:layout_marginBottom="@dimen/_15sdp"
+                    android:paddingEnd="@dimen/_36sdp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toTopOf="@id/btn_toggle"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    android:paddingHorizontal="@dimen/_16sdp"
-                    android:paddingVertical="@dimen/_6sdp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:gravity="center">
 
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
+                    <include
+                        android:id="@+id/ly_parameter_1"
+                        layout="@layout/layout_parameter_slider" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Frequency Cutoff"
-                            android:textColor="@color/white"
-                            android:layout_alignParentStart="true"
-                            android:layout_above="@id/sld_freq_cutoff"
-                            />
+                    <include
+                        android:id="@+id/ly_parameter_2"
+                        layout="@layout/layout_parameter_slider" />
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/white"
-                            android:layout_alignParentEnd="true"
-                            android:layout_above="@id/sld_freq_cutoff"/>
+                    <include
+                        android:id="@+id/ly_parameter_3"
+                        layout="@layout/layout_parameter_slider" />
 
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/sld_freq_cutoff"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_16sdp"
-                            android:layout_alignParentStart="true"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentBottom="true">
-
-                        </com.google.android.material.slider.Slider>
-
-                    </RelativeLayout>
+                    <include
+                        android:id="@+id/ly_parameter_4"
+                        layout="@layout/layout_parameter_slider" />
 
                 </LinearLayout>
 
@@ -139,62 +146,50 @@
                     android:id="@+id/btn_toggle"
                     android:layout_width="@dimen/_58sdp"
                     android:layout_height="@dimen/_58sdp"
-                    android:background="@color/greySpace_02"
                     android:layout_marginBottom="@dimen/_14sdp"
+                    android:src="@drawable/btn_toggle"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent">
 
                 </ImageView>
 
-                <RelativeLayout
+                <TextView
                     android:id="@+id/btn_load_file"
-                    android:layout_width="@dimen/_75sdp"
-                    android:layout_height="@dimen/_23sdp"
+                    style="@style/commonButtons"
                     android:layout_marginLeft="@dimen/_12sdp"
                     android:layout_marginBottom="@dimen/_9sdp"
-                    android:background="@color/greySpace_02"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent">
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="Load File">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="Load File"
-                        android:gravity="center"/>
+                </TextView>
 
-                </RelativeLayout>
-
-                <RelativeLayout
+                <TextView
                     android:id="@+id/btn_apply_filter"
-                    android:layout_width="@dimen/_75sdp"
-                    android:layout_height="@dimen/_23sdp"
+                    style="@style/commonButtons"
                     android:layout_marginRight="@dimen/_12sdp"
                     android:layout_marginBottom="@dimen/_9sdp"
-                    android:background="@color/greySpace_02"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:text="Apply Filter">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="Apply Filter"
-                        android:gravity="center"/>
-
-                </RelativeLayout>
+                </TextView>
 
                 <ImageView
                     android:id="@+id/btn_show_menu"
                     android:layout_width="@dimen/_30sdp"
-                    android:layout_height="@dimen/_24sdp"
+                    android:layout_height="@dimen/_30sdp"
                     android:layout_marginTop="@dimen/_12sdp"
-                    android:padding="@dimen/_4sdp"
+                    android:padding="@dimen/_7sdp"
                     android:src="@drawable/ic_baseline_dehaze"
+                    android:scaleType="centerInside"
+                    android:background="@drawable/bg_rounded_left_corner"
+                    android:backgroundTint="@color/greySpace_02"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/ly_right_menu_master"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -204,20 +199,19 @@
 
                     <ImageView
                         android:id="@+id/ly_right_menu_over"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:background="@color/black"
-                        android:alpha="0.6"
+                        android:layout_width="match_parent"
+                        android:background="@color/black.a060"
                         android:layout_height="match_parent"/>
 
                     <LinearLayout
                         android:id="@+id/ly_right_menu_main"
-                        android:layout_width="@dimen/_100sdp"
+                        android:layout_width="@dimen/_140sdp"
                         android:layout_height="match_parent"
                         android:background="@color/blackPurple_02"
-                        >
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:orientation="vertical" >
 
-                        <RelativeLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="@dimen/_40sdp"
                             android:padding="@dimen/_6sdp"
@@ -227,20 +221,43 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Filters"
-                                android:textColor="@color/white"/>
+                                android:textColor="@color/white"
+                                android:gravity="center"
+                                android:fontFamily="@font/montserrat"
+                                android:textSize="@dimen/_12sdp"
+                                android:layout_marginLeft="@dimen/_4sdp"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
 
                             <ImageView
                                 android:id="@+id/btn_right_menu_close"
                                 android:layout_width="@dimen/_18sdp"
                                 android:layout_height="@dimen/_18sdp"
                                 android:src="@drawable/ic_baseline_close"
-                                android:layout_alignParentRight="true"/>
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent" />
 
-                        </RelativeLayout>
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:paddingHorizontal="@dimen/_9sdp">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                tools:listitem="@layout/item_filter"/>
+
+                        </FrameLayout>
 
                     </LinearLayout>
 
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

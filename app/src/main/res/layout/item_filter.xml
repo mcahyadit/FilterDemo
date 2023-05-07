@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:padding="@dimen/_9sdp"
+            android:layout_marginVertical="@dimen/_8sdp"
+            android:background="@drawable/btn_common">
+
+            <TextView
+                android:id="@+id/tv_filter_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Low-Pass Filter"
+                android:textSize="@dimen/_7sdp"
+                android:fontFamily="@font/montserrat"
+                android:textFontWeight="600"
+                android:maxLines="2"
+                android:hyphenationFrequency="normal"
+                android:gravity="center_vertical" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+</layout>

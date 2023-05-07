@@ -15,9 +15,34 @@
     </style>
 
     <style name="mediaPlayerButtons">
-        <item name="android:layout_height">@dimen/_20sdp</item>
-        <item name="android:layout_width">@dimen/_20sdp</item>
-        <item name="android:layout_marginHorizontal" tools:targetApi="o">@dimen/_18sdp</item>
-        <item name="android:background">@color/greySpace_02</item>
+        <item name="android:layout_height">@dimen/_25sdp</item>
+        <item name="android:layout_width">@dimen/_25sdp</item>
+        <item name="android:layout_marginLeft">@dimen/_18sdp</item>
+        <item name="android:layout_marginRight">@dimen/_18sdp</item>
+        <item name="android:padding">@dimen/_3sdp</item>
+        <item name="android:background">@drawable/circle</item>
+        <item name="android:backgroundTint">@color/greySpace_02</item>
+        <item name="android:backgroundTintMode">multiply</item>
+    </style>
+
+    <style name="commonButtons">
+        <item name="android:layout_height">@dimen/_30sdp</item>
+        <item name="android:layout_width">@dimen/_75sdp</item>
+        <item name="android:background">@drawable/btn_common</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">@dimen/_9sdp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="parameterSliderText">
+        <item name="android:layout_height">@dimen/_16sdp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:color">@color/greySpace_02</item>
+        <item name="android:backgroundTint">@color/greySpace_02</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textSize">@dimen/_6sdp</item>
+        <item name="android:gravity">center_vertical</item>
     </style>
 </resources>
