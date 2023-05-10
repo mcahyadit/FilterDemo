@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blackPurple_01">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/greySpace_02"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_20sdp"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toTopOf="@id/ly_media_control">
+
+                    <TextView
+                        android:id="@+id/tv_current"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="@dimen/_5sdp"
+                        android:text="0:00" />
+
+                    <SeekBar
+                        android:id="@+id/ly_seekbar"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/tv_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="@dimen/_5sdp"
+                        android:text="0:00" />
+
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ly_media_control"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_48sdp"
+                    android:background="@color/blackPurple_02"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ImageView
+                        style="@style/mediaPlayerButtons"
+                        android:id="@+id/btn_play_pause"
+                        android:layout_width="@dimen/_36sdp"
+                        android:layout_height="@dimen/_36sdp"
+                        android:src="@drawable/ic_baseline_play_arrow"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        style="@style/mediaPlayerButtons"
+                        android:id="@+id/btn_forward"
+                        android:src="@drawable/ic_baseline_forward_5"
+                        app:layout_constraintLeft_toRightOf="@id/btn_play_pause"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        style="@style/mediaPlayerButtons"
+                        android:id="@+id/btn_backward"
+                        android:src="@drawable/ic_baseline_replay_5"
+                        app:layout_constraintRight_toLeftOf="@id/btn_play_pause"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        style="@style/mediaPlayerButtons"
+                        android:id="@+id/btn_previous"
+                        android:src="@drawable/ic_baseline_skip_previous"
+                        app:layout_constraintRight_toLeftOf="@id/btn_backward"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        style="@style/mediaPlayerButtons"
+                        android:id="@+id/btn_loop"
+                        android:src="@drawable/ic_baseline_repeat"
+                        app:layout_constraintLeft_toRightOf="@id/btn_forward"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/ly_media_control">
+
+                    <LinearLayout
+                        android:id="@+id/vw_audio_original"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_audio_original_wv"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:id="@+id/tv_audio_original_ft"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/vw_audio_filtered"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_audio_filtered_wv"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:id="@+id/tv_audio_filtered_tf"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+
+        </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp">
+
+                <ImageView
+                    android:id="@+id/btn_toggle"
+                    android:layout_width="@dimen/_58sdp"
+                    android:layout_height="@dimen/_58sdp"
+                    android:layout_marginBottom="@dimen/_14sdp"
+                    android:src="@drawable/btn_toggle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent">
+
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/btn_load_file"
+                    style="@style/commonButtons"
+                    android:layout_marginLeft="@dimen/_12sdp"
+                    android:layout_marginBottom="@dimen/_9sdp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:text="Load File">
+
+                </TextView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+
+
+    </FrameLayout>
+
+</layout>

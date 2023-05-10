@@ -4,10 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <FrameLayout
-        android:id="@+id/mainFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusableInTouchMode="true"/>
+        android:layout_height="match_parent">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mainFragmentContainer"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusableInTouchMode="true"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/navigation"/>
+
+    </FrameLayout>
 
 </layout>

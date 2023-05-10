@@ -14,7 +14,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_350sdp"
                 android:background="@color/greySpace_02"
@@ -23,8 +23,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_20sdp"
-                    android:layout_above="@+id/ly_media_control"
-                    android:gravity="center">
+                    android:gravity="center"
+                    app:layout_constraintBottom_toTopOf="@id/ly_media_control">
 
                     <TextView
                         android:id="@+id/tv_current"
@@ -53,7 +53,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_48sdp"
                     android:background="@color/blackPurple_02"
-                    android:layout_alignParentBottom="true">
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                     <ImageView
                         style="@style/mediaPlayerButtons"
@@ -100,8 +100,60 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/ly_media_control">
 
-            </RelativeLayout>
+                    <LinearLayout
+                        android:id="@+id/vw_audio_original"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_audio_original_wv"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:id="@+id/tv_audio_original_ft"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/vw_audio_filtered"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_audio_filtered_wv"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:id="@+id/tv_audio_filtered_tf"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

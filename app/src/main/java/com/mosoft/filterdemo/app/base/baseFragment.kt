@@ -8,15 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.navigation.fragment.NavHostFragment
 import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.events.EventBus
 import com.google.android.material.snackbar.Snackbar
 
 open class baseFragment : Fragment() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onResume() {
         super.onResume()

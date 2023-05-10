@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/mainMenuFragment">
+
+    <fragment
+        android:id="@+id/loadingScreenFragment"
+        android:name="com.mosoft.filterdemo.app.ui.loadingScreenFragment"
+        android:label="loadingScreenFragment">
+        <action
+            android:id="@+id/action_loadingScreenFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="com.mosoft.filterdemo.app.ui.mainMenuFragment"
+        android:label="mainMenuFragment">
+        <action
+            android:id="@+id/action_mainMenuFragment_to_filteringScreenFragment"
+            app:destination="@id/filteringScreenFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_preFilteredScreenFragment"
+            app:destination="@id/preFilteredScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/filteringScreenFragment"
+        android:name="com.mosoft.filterdemo.app.ui.filteringScreenFragment"
+        android:label="filteringScreenFragment">
+        <action
+            android:id="@+id/action_filteringScreenFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/preFilteredScreenFragment"
+        android:name="com.mosoft.filterdemo.app.ui.preFilteredScreenFragment"
+        android:label="preFilteredScreenFragment">
+        <action
+            android:id="@+id/action_preFilteredScreenFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+</navigation>

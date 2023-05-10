@@ -6,8 +6,6 @@ import android.content.Intent
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaPlayer
-import android.media.audiofx.EnvironmentalReverb
-import android.media.audiofx.Equalizer
 import android.media.audiofx.PresetReverb
 import android.media.audiofx.Visualizer
 import android.net.Uri
@@ -22,6 +20,7 @@ import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.filters.LowPassFS
@@ -32,7 +31,7 @@ import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.base.baseFragment
 import com.mosoft.filterdemo.app.events.Events
 import com.mosoft.filterdemo.app.filterList.filterListRVAdapter
-import com.mosoft.filterdemo.databinding.FragmentMainScreenBinding
+import com.mosoft.filterdemo.databinding.FragmentFilteringScreenBinding
 import com.mosoft.filterdemo.db.filterList
 import com.squareup.otto.Subscribe
 import javazoom.jl.decoder.Bitstream
@@ -42,12 +41,13 @@ import java.lang.Math.max
 import java.lang.Math.min
 
 
-class mainScreenFragment: baseFragment() {
+class filteringScreenFragment: baseFragment() {
 
     var mBufferSize = 64000
     var mOverlap = 32000
 
-    lateinit var binding : FragmentMainScreenBinding
+    lateinit var binding : FragmentFilteringScreenBinding
+
     lateinit var playerOriginal : MediaPlayer
     lateinit var playerFiltered : MediaPlayer
     lateinit var PHeffectA : PresetReverb
@@ -74,7 +74,7 @@ class mainScreenFragment: baseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil
-            .inflate(inflater, R.layout.fragment_main_screen, container, false)
+            .inflate(inflater, R.layout.fragment_filtering_screen, container, false)
 
         binding.lyParameter1.root.visibility = View.GONE
         binding.lyParameter2.root.visibility = View.GONE
@@ -188,7 +188,7 @@ class mainScreenFragment: baseFragment() {
 
         //Player
 
-        var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 Log.d("DEBUG HERE", "mUri Read")
                 val mUri : Uri = result.data?.data!!
@@ -493,7 +493,7 @@ class mainScreenFragment: baseFragment() {
     }
 
     private fun setupSeekBar() {
-        binding.lySeekbar.max = playerOriginal.duration
+        binding.lySeekbar.max = Integer.min(playerOriginal.duration, playerFiltered.duration)
         binding.tvDuration.text = timeStringMaker(playerOriginal.duration)
 
         val seekBarHandler = Handler()

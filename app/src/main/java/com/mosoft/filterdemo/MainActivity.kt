@@ -1,27 +1,38 @@
 package com.mosoft.filterdemo
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.AttributeSet
 import android.view.View
 import android.view.WindowManager
-import androidx.databinding.DataBindingUtil
-import be.tarsos.dsp.io.android.AndroidFFMPEGLocator
-import be.tarsos.dsp.util.FFMPEGDownloader
-import com.mosoft.filterdemo.app.ui.mainScreenFragment
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.NavHostFragment
+import com.mosoft.filterdemo.app.ui.filteringScreenFragment
+import com.mosoft.filterdemo.app.ui.mainMenuFragment
 import com.mosoft.filterdemo.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding : ActivityMainBinding
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        FFMPEGDownloader()
-        AndroidFFMPEGLocator(this)
+        //FFMPEGDownloader()
+        //AndroidFFMPEGLocator(this)
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.mainFragmentContainer) as NavHostFragment
+        val navController = navHostFragment.navController
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {  // < 16
             window.setFlags(
@@ -37,8 +48,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        val startupFragment = mainScreenFragment()
-        supportFragmentManager.beginTransaction()
-            .replace(binding.mainFragmentContainer.id,startupFragment).commit()
+        //val startupFragment = mainMenuFragment()
+        //supportFragmentManager.beginTransaction().replace(binding.mainFragmentContainer.id,startupFragment).commit()
     }
 }
