@@ -4,15 +4,15 @@ import com.mosoft.filterdemo.app.filterList.filterDataClass
 
 fun filterList(): List<filterDataClass> {
     var tmpList = buildList<filterDataClass> {
-        lateinit var tmpStringList : List<String>
-        lateinit var tmpBoolList : List<Boolean>
-        lateinit var tmpIntList : List<Int>
-        lateinit var tmpData : filterDataClass
+        lateinit var tmpStringList: List<String>
+        lateinit var tmpBoolList: List<Boolean>
+        lateinit var tmpIntList: List<Int>
+        lateinit var tmpData: filterDataClass
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Filter Order","",
-            "Passband Attenuation","dB"
+            "Passband Frequency", "Hz",
+            "Filter Order", "",
+            "Passband Attenuation", "dB"
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -32,12 +32,12 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Filter Order","",
-            "Passband Attenuation",""
+            "Passband Frequency", "Hz",
+            "Filter Order", "",
+            "Passband Attenuation", ""
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -57,13 +57,13 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Stopband Frequency","Hz",
-            "Passband Attenuation","dB",
-            "Stopband Attenuation","dB"
+            "Passband Frequency", "Hz",
+            "Stopband Frequency", "Hz",
+            "Passband Attenuation", "dB",
+            "Stopband Attenuation", "dB"
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -85,13 +85,13 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Stopband Frequency","Hz",
-            "Passband Attenuation","",
-            "Stopband Attenuation",""
+            "Passband Frequency", "Hz",
+            "Stopband Frequency", "Hz",
+            "Passband Attenuation", "",
+            "Stopband Attenuation", ""
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -113,12 +113,12 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Filter Order","",
-            "Passband Attenuation","dB"
+            "Passband Frequency", "Hz",
+            "Filter Order", "",
+            "Passband Attenuation", "dB"
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -138,12 +138,12 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Filter Order","",
-            "Passband Attenuation",""
+            "Passband Frequency", "Hz",
+            "Filter Order", "",
+            "Passband Attenuation", ""
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -163,13 +163,13 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Stopband Frequency","Hz",
-            "Passband Attenuation","dB",
-            "Stopband Attenuation","dB"
+            "Passband Frequency", "Hz",
+            "Stopband Frequency", "Hz",
+            "Passband Attenuation", "dB",
+            "Stopband Attenuation", "dB"
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -191,13 +191,13 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
 
         tmpStringList = listOf<String>(
-            "Passband Frequency","Hz",
-            "Stopband Frequency","Hz",
-            "Passband Attenuation","",
-            "Stopband Attenuation",""
+            "Passband Frequency", "Hz",
+            "Stopband Frequency", "Hz",
+            "Passband Attenuation", "",
+            "Stopband Attenuation", ""
         )
         tmpBoolList = listOf<Boolean>(
             false,
@@ -219,7 +219,7 @@ fun filterList(): List<filterDataClass> {
             tmpBoolList,
             tmpIntList
         )
-        this.add(tmpData.id,tmpData)
+        this.add(tmpData.id, tmpData)
     }
 
     return tmpList

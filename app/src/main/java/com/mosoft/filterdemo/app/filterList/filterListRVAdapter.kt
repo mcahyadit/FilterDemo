@@ -7,7 +7,8 @@ import com.mosoft.filterdemo.app.events.EventBus
 import com.mosoft.filterdemo.app.events.Events
 import com.mosoft.filterdemo.databinding.ItemFilterBinding
 
-class filterListRVAdapter(val list: List<filterDataClass>) : RecyclerView.Adapter<filterListRVItemViewHolder>() {
+class filterListRVAdapter(val list: List<filterDataClass>) :
+    RecyclerView.Adapter<filterListRVItemViewHolder>() {
 
     lateinit var binding: ItemFilterBinding
     var currentItemId = -1
@@ -26,7 +27,7 @@ class filterListRVAdapter(val list: List<filterDataClass>) : RecyclerView.Adapte
 
         EventBus.getInstance().register(this)
         holder.itemView.setOnClickListener {
-            if(currentItemId == list[position].id) {
+            if (currentItemId == list[position].id) {
                 //to do
             } else {
                 currentItemId = list[position].id

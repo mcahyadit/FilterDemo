@@ -3,11 +3,8 @@ package com.mosoft.filterdemo.app.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.media.MediaExtractor
-import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
-import android.media.audiofx.PresetReverb
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -20,26 +17,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.base.baseFragment
-import com.mosoft.filterdemo.databinding.FragmentMainMenuBinding
 import com.mosoft.filterdemo.databinding.FragmentPreFilteredScreenBinding
-import java.io.File
 import java.lang.Integer.min
 import java.lang.Math.abs
-import kotlin.concurrent.fixedRateTimer
 
-class preFilteredScreenFragment: baseFragment() {
+class preFilteredScreenFragment : baseFragment() {
 
     lateinit var binding: FragmentPreFilteredScreenBinding
 
-    lateinit var playerOriginal : MediaPlayer
-    lateinit var playerFiltered : MediaPlayer
-    lateinit var mUriOriginal : Uri
-    lateinit var mUriFiltered : Uri
+    lateinit var playerOriginal: MediaPlayer
+    lateinit var playerFiltered: MediaPlayer
+    lateinit var mUriOriginal: Uri
+    lateinit var mUriFiltered: Uri
 
-    var firstLoad = true
     var isPlaying = false //For Handling onPause and onResume continuity
     var isLooping = false
-    var boolOne = true
+    var firstLoad = true
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -50,70 +43,72 @@ class preFilteredScreenFragment: baseFragment() {
         binding = DataBindingUtil
             .inflate(inflater, R.layout.fragment_pre_filtered_screen, container, false)
 
-        val resultLauncherFirstLoad = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                mUriOriginal = result.data?.data!!
-            }
-        }
-        val resultLauncherSecondLoad = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                mUriFiltered = result.data?.data!!
-
-                //Check duration
-                val mediaExtractor1 = MediaMetadataRetriever()
-                mediaExtractor1.setDataSource(context, mUriOriginal)
-                val mediaExtractor2 = MediaMetadataRetriever()
-                mediaExtractor2.setDataSource(context, mUriFiltered)
-
-                val dur1 = mediaExtractor1.
-                    extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toInt()
-                val dur2 = mediaExtractor2.
-                    extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toInt()
-
-                if(abs(dur1-dur2) >= 300) {
-                    firstLoad = true
-                    MakeToast("Invalid Input - Duration of two files does not match")
-                } else {
-                    playerOriginal = MediaPlayer.create(context, mUriOriginal)
-                    playerFiltered = MediaPlayer.create(context, mUriFiltered)
-                    setupSeekBar()
-                    if(boolOne) {
-                        massButtonEnabler()
-                        boolOne = false
-                    }
-
-                    //OnCompletionButtonHandler
-                    playerOriginal.setOnCompletionListener {
-                        if(!it.isLooping)
-                            playPauseMediaPlayer()
-                    }
-
-                    playerOriginal.setVolume(0f,0f)
-                    playerFiltered.setVolume(1f,1f)
+        val resultLauncherFirstLoad =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    mUriOriginal = result.data?.data!!
                 }
             }
-        }
+        val resultLauncherSecondLoad =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    mUriFiltered = result.data?.data!!
+
+                    //Check duration
+                    val mediaExtractor1 = MediaMetadataRetriever()
+                    mediaExtractor1.setDataSource(context, mUriOriginal)
+                    val mediaExtractor2 = MediaMetadataRetriever()
+                    mediaExtractor2.setDataSource(context, mUriFiltered)
+
+                    val dur1 =
+                        mediaExtractor1.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!
+                            .toInt()
+                    val dur2 =
+                        mediaExtractor2.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!
+                            .toInt()
+
+                    if (abs(dur1 - dur2) >= 300) {
+                        MakeToast("Invalid Input - Duration of two files does not match")
+                    } else {
+                        playerOriginal = MediaPlayer.create(context, mUriOriginal)
+                        playerFiltered = MediaPlayer.create(context, mUriFiltered)
+                        setupSeekBar()
+                        if (firstLoad) {
+                            massButtonEnabler()
+                            firstLoad = false
+                        }
+
+                        //OnCompletionButtonHandler
+                        playerOriginal.setOnCompletionListener {
+                            if (!it.isLooping)
+                                playPauseMediaPlayer()
+                        }
+
+                        playerOriginal.setVolume(0f, 0f)
+                        playerFiltered.setVolume(1f, 1f)
+                    }
+                }
+            }
 
         binding.btnLoadFile.setOnClickListener {
             val mIntent = Intent(Intent.ACTION_GET_CONTENT)
-            firstLoad = true
             mIntent.type = "audio/*"
-            resultLauncherFirstLoad.launch(Intent.createChooser(mIntent,"Select Audio File"))
-            resultLauncherSecondLoad.launch(Intent.createChooser(mIntent,"Select Audio File"))
+            resultLauncherFirstLoad.launch(Intent.createChooser(mIntent, "Select Audio File"))
+            resultLauncherSecondLoad.launch(Intent.createChooser(mIntent, "Select Audio File"))
         }
 
         binding.btnToggle.setOnTouchListener { it, motionEvent ->
             //playerFiltered.seekTo(playerOriginal.currentPosition)
-            if(motionEvent.action == MotionEvent.ACTION_DOWN) {
+            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 binding.btnToggle.setColorFilter(resources.getColor(R.color.PHred))
-                playerOriginal.setVolume(1f,1f)
-                playerFiltered.setVolume(0f,0f)
+                playerOriginal.setVolume(1f, 1f)
+                playerFiltered.setVolume(0f, 0f)
 
                 //MakeToast("Listening to Unfiltered Audio")  //DEBUG
-            } else if(motionEvent.action == MotionEvent.ACTION_UP) {
+            } else if (motionEvent.action == MotionEvent.ACTION_UP) {
                 binding.btnToggle.clearColorFilter()
-                playerOriginal.setVolume(0f,0f)
-                playerFiltered.setVolume(1f,1f)
+                playerOriginal.setVolume(0f, 0f)
+                playerFiltered.setVolume(1f, 1f)
 
                 //MakeToast("Listening to Filtered Audio")    //DEBUG
             }
@@ -126,11 +121,16 @@ class preFilteredScreenFragment: baseFragment() {
         }
 
         binding.btnBackward.setOnClickListener {
-            seekToMediaPlayer(kotlin.math.max(playerOriginal.currentPosition + 5000,0))
+            seekToMediaPlayer(kotlin.math.max(playerOriginal.currentPosition + 5000, 0))
         }
 
         binding.btnForward.setOnClickListener {
-            seekToMediaPlayer(kotlin.math.min(playerOriginal.currentPosition + 5000,playerOriginal.duration))
+            seekToMediaPlayer(
+                kotlin.math.min(
+                    playerOriginal.currentPosition + 5000,
+                    playerOriginal.duration
+                )
+            )
         }
 
         binding.btnPrevious.setOnClickListener {
@@ -138,12 +138,11 @@ class preFilteredScreenFragment: baseFragment() {
         }
 
         binding.btnLoop.setOnClickListener {
-            if(isLooping) {
+            if (isLooping) {
                 isLooping = false
                 playerOriginal.isLooping = false
                 playerFiltered.isLooping = false
-            }
-            else {
+            } else {
                 isLooping = true
                 playerOriginal.isLooping = true
                 playerFiltered.isLooping = true
@@ -152,7 +151,7 @@ class preFilteredScreenFragment: baseFragment() {
 
         binding.lySeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(fromUser)
+                if (fromUser)
                     seekToMediaPlayer(progress)
             }
 
@@ -169,13 +168,13 @@ class preFilteredScreenFragment: baseFragment() {
     }
 
     private fun playPauseMediaPlayer() {
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.pause()
             playerFiltered.pause()
             isPlaying = false
             binding.btnPlayPause.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_play_arrow))
         } else {
-            if(playerOriginal.currentPosition == playerOriginal.duration) {
+            if (playerOriginal.currentPosition == playerOriginal.duration) {
                 //Handle Status on Completion
                 seekToMediaPlayer(0)
             }
@@ -193,21 +192,21 @@ class preFilteredScreenFragment: baseFragment() {
     }
 
     private fun setupSeekBar() {
-        binding.lySeekbar.max = min(playerOriginal.duration,playerFiltered.duration)
+        binding.lySeekbar.max = min(playerOriginal.duration, playerFiltered.duration)
         binding.tvDuration.text = timeStringMaker(playerOriginal.duration)
 
         val seekBarHandler = Handler()
-        seekBarHandler.postDelayed( object : Runnable {
+        seekBarHandler.postDelayed(object : Runnable {
             override fun run() {
                 binding.lySeekbar.progress = playerOriginal.currentPosition
                 binding.tvCurrent.text = timeStringMaker(binding.lySeekbar.progress)
-                seekBarHandler.postDelayed(this,300)
+                seekBarHandler.postDelayed(this, 300)
             }
         }, 0)
     }
 
     private fun massButtonEnabler() {
-        if(binding.btnPlayPause.isClickable) {
+        if (binding.btnPlayPause.isClickable) {
             binding.btnPlayPause.isClickable = false
             binding.btnPlayPause.alpha = 0.3f
 
@@ -217,7 +216,7 @@ class preFilteredScreenFragment: baseFragment() {
             binding.btnBackward.isClickable = false
             binding.btnBackward.alpha = 0.3f
 
-            if(isLooping) {
+            if (isLooping) {
                 binding.btnLoop.performClick()
             }
             binding.btnLoop.isClickable = false
@@ -255,12 +254,12 @@ class preFilteredScreenFragment: baseFragment() {
     }
 
     private fun timeStringMaker(timeStamp: Int): String {
-        val minute = timeStamp/1000/60
-        val second = timeStamp/1000%60
+        val minute = timeStamp / 1000 / 60
+        val second = timeStamp / 1000 % 60
 
         val minuteString = minute.toString()
         var secondString = second.toString()
-        if (second<10)
+        if (second < 10)
             secondString = "0$secondString"
 
         return ("$minuteString:$secondString")
@@ -269,7 +268,7 @@ class preFilteredScreenFragment: baseFragment() {
     override fun onPause() {
         super.onPause()
 
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.pause()
             playerFiltered.pause()
         }
@@ -278,7 +277,7 @@ class preFilteredScreenFragment: baseFragment() {
     override fun onResume() {
         super.onResume()
 
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.start()
             playerFiltered.start()
         }

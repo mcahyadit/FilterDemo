@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -12,21 +11,21 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_40sdp"
-            android:padding="@dimen/_9sdp"
             android:layout_marginVertical="@dimen/_8sdp"
-            android:background="@drawable/btn_common">
+            android:background="@drawable/btn_common"
+            android:padding="@dimen/_9sdp">
 
             <TextView
                 android:id="@+id/tv_filter_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Low-Pass Filter"
-                android:textSize="@dimen/_7sdp"
                 android:fontFamily="@font/montserrat"
-                android:textFontWeight="600"
-                android:maxLines="2"
+                android:gravity="center_vertical"
                 android:hyphenationFrequency="normal"
-                android:gravity="center_vertical" />
+                android:maxLines="2"
+                android:text="Low-Pass Filter"
+                android:textFontWeight="600"
+                android:textSize="@dimen/_7sdp" />
 
         </FrameLayout>
 

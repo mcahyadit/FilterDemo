@@ -2,18 +2,17 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/gp_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="2"
-        android:orientation="vertical"
         android:layout_gravity="center"
-        android:layout_marginVertical="@dimen/_6sdp">
+        android:layout_marginVertical="@dimen/_6sdp"
+        android:orientation="vertical"
+        android:weightSum="2">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -21,37 +20,37 @@
             android:layout_weight="1">
 
             <TextView
-                style="@style/parameterSliderText"
                 android:id="@+id/tv_slider_parameter_name"
-                android:text="Frequency Cutoff"
+                style="@style/parameterSliderText"
                 android:layout_marginStart="@dimen/_8sdp"
-                app:layout_constraintTop_toTopOf="parent"
+                android:text="Frequency Cutoff"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                style="@style/parameterSliderText"
                 android:id="@+id/et_slider_parameter"
+                style="@style/parameterSliderText"
                 android:layout_alignParentEnd="true"
-                android:background="@drawable/element_basic_edit_text_background"
-                android:paddingHorizontal="@dimen/_1sdp"
                 android:layout_marginHorizontal="@dimen/_2sdp"
+                android:background="@drawable/element_basic_edit_text_background"
                 android:hint="0"
-                android:maxLines="1"
                 android:inputType="number"
+                android:maxLines="1"
+                android:paddingHorizontal="@dimen/_1sdp"
                 android:textAlignment="viewEnd"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/tv_slider_parameter_unit" />
+                app:layout_constraintEnd_toStartOf="@id/tv_slider_parameter_unit"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                style="@style/parameterSliderText"
                 android:id="@+id/tv_slider_parameter_unit"
-                android:text="kHz"
+                style="@style/parameterSliderText"
                 android:layout_marginEnd="@dimen/_8sdp"
-                app:layout_constraintTop_toTopOf="parent"
+                android:text="kHz"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -61,8 +60,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:paddingVertical="@dimen/_2sdp"
-            app:layout_constraintTop_toBottomOf="@id/et_slider_parameter"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/et_slider_parameter" />
 
     </LinearLayout>
 </FrameLayout>

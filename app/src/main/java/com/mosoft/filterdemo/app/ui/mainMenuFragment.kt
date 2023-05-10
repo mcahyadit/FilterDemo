@@ -5,15 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.base.baseFragment
-import com.mosoft.filterdemo.databinding.FragmentLoadingScreenBinding
 import com.mosoft.filterdemo.databinding.FragmentMainMenuBinding
 
-class mainMenuFragment: baseFragment() {
+class mainMenuFragment : baseFragment() {
     lateinit var binding: FragmentMainMenuBinding
 
 
@@ -30,7 +27,8 @@ class mainMenuFragment: baseFragment() {
         }
 
         binding.btnPreFiltered.setOnClickListener {
-            it.findNavController().navigate(R.id.action_mainMenuFragment_to_preFilteredScreenFragment)
+            it.findNavController()
+                .navigate(R.id.action_mainMenuFragment_to_preFilteredScreenFragment)
         }
 
         return binding.root

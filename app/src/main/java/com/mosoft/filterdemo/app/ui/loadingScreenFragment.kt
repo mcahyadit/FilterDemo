@@ -9,8 +9,8 @@ import com.mosoft.filterdemo.R
 import com.mosoft.filterdemo.app.base.baseFragment
 import com.mosoft.filterdemo.databinding.FragmentLoadingScreenBinding
 
-class loadingScreenFragment: baseFragment() {
-    lateinit var binding : FragmentLoadingScreenBinding
+class loadingScreenFragment : baseFragment() {
+    lateinit var binding: FragmentLoadingScreenBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,

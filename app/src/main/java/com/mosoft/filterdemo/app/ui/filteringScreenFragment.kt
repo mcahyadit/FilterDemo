@@ -6,7 +6,6 @@ import android.content.Intent
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaPlayer
-import android.media.audiofx.PresetReverb
 import android.media.audiofx.Visualizer
 import android.net.Uri
 import android.os.Bundle
@@ -41,31 +40,26 @@ import java.lang.Math.max
 import java.lang.Math.min
 
 
-class filteringScreenFragment: baseFragment() {
+class filteringScreenFragment : baseFragment() {
 
     var mBufferSize = 64000
     var mOverlap = 32000
 
-    lateinit var binding : FragmentFilteringScreenBinding
+    lateinit var binding: FragmentFilteringScreenBinding
 
-    lateinit var playerOriginal : MediaPlayer
-    lateinit var playerFiltered : MediaPlayer
-    lateinit var PHeffectA : PresetReverb
-    lateinit var PHeffectB : PresetReverb
-    lateinit var playerOriginalViz : Visualizer
-    lateinit var playerFilteredViz : Visualizer
-    lateinit var tmpFileOriginal : File
-    lateinit var tmpFileFiltered : File
-    lateinit var mediaExtractor : MediaExtractor
-    lateinit var outputFile : RandomAccessFile
-    lateinit var mediaFormat : MediaFormat
-    lateinit var pcmArray : ShortArray
+    lateinit var playerOriginal: MediaPlayer
+    lateinit var playerFiltered: MediaPlayer
+    lateinit var tmpFileOriginal: File
+    lateinit var tmpFileFiltered: File
+    lateinit var mediaExtractor: MediaExtractor
+    lateinit var outputFile: RandomAccessFile
+    lateinit var mediaFormat: MediaFormat
 
     var currentFilterId = 0
     var isPlaying = false //For Handling onPause and onResume continuity
     var isLooping = false
     var isEditingParameter = false
-    var boolOne = true
+    var firstLoad = true
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -82,7 +76,7 @@ class filteringScreenFragment: baseFragment() {
         binding.lyParameter4.root.visibility = View.GONE
 
         binding.btnShowMenu.setOnClickListener {
-            if(it.isClickable) {
+            if (it.isClickable) {
                 binding.btnShowMenu.isClickable = false
                 binding.btnRightMenuClose.isClickable = true
                 binding.lyRightMenuMaster.visibility = View.VISIBLE
@@ -91,7 +85,8 @@ class filteringScreenFragment: baseFragment() {
 
                 binding.lyRightMenuMain.apply {
                     clearAnimation()
-                    animation = AnimationUtils.loadAnimation(context, R.anim.animation_slide_in_from_right)
+                    animation =
+                        AnimationUtils.loadAnimation(context, R.anim.animation_slide_in_from_right)
                     animation.duration = 300
                     animate()
                 }
@@ -103,7 +98,8 @@ class filteringScreenFragment: baseFragment() {
                     animate()
                 }
 
-                binding.lyRightMenuMain.animation.setAnimationListener(object : Animation.AnimationListener {
+                binding.lyRightMenuMain.animation.setAnimationListener(object :
+                    Animation.AnimationListener {
                     override fun onAnimationStart(animation: Animation?) {
                     }
 
@@ -120,7 +116,7 @@ class filteringScreenFragment: baseFragment() {
         }
 
         binding.btnRightMenuClose.setOnClickListener {
-            if(it.isClickable) {
+            if (it.isClickable) {
                 binding.btnRightMenuClose.isClickable = false
                 binding.btnShowMenu.isClickable = true
                 binding.lyRightMenuOver.isClickable = false
@@ -128,7 +124,8 @@ class filteringScreenFragment: baseFragment() {
 
                 binding.lyRightMenuMain.apply {
                     binding.lyRightMenuMain.clearAnimation()
-                    animation = AnimationUtils.loadAnimation(context, R.anim.animation_slide_out_to_right)
+                    animation =
+                        AnimationUtils.loadAnimation(context, R.anim.animation_slide_out_to_right)
                     animation.duration = 300
                     animate()
                 }
@@ -140,7 +137,8 @@ class filteringScreenFragment: baseFragment() {
                     animate()
                 }
 
-                binding.lyRightMenuMain.animation.setAnimationListener(object : Animation.AnimationListener {
+                binding.lyRightMenuMain.animation.setAnimationListener(object :
+                    Animation.AnimationListener {
                     override fun onAnimationStart(animation: Animation?) {
                     }
 
@@ -162,117 +160,78 @@ class filteringScreenFragment: baseFragment() {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if(binding.lyRightMenuMaster.visibility == View.VISIBLE)
+                if (binding.lyRightMenuMaster.visibility == View.VISIBLE)
                     binding.btnRightMenuClose.performClick()
                 else
                     findNavController().popBackStack()
             }
         }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,callback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         //Player
+        val resultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val mUri: Uri = result.data?.data!!
 
-        val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val mUri : Uri = result.data?.data!!
+                    prepFiles()
+                    createFileFromStream(
+                        requireContext().contentResolver.openInputStream(mUri)!!,
+                        tmpFileOriginal
+                    )
 
-                prepFiles()
-                createFileFromStream(requireContext().contentResolver.openInputStream(mUri)!!,tmpFileOriginal)
+                    mediaExtractor = MediaExtractor()
+                    mediaExtractor.setDataSource(tmpFileOriginal.path)
+                    mediaFormat = mediaExtractor.getTrackFormat(0)
 
-                mediaExtractor = MediaExtractor()
-                mediaExtractor.setDataSource(tmpFileOriginal.path)
-                mediaFormat = mediaExtractor.getTrackFormat(0)
+                    setupAudio(tmpFileOriginal, 500f)
 
-                setupAudio(tmpFileOriginal, 500f)
+                    val originalUri = Uri.parse(tmpFileOriginal.path)
+                    val filteredUri = Uri.parse(tmpFileFiltered.path)
 
-                val originalUri = Uri.parse(tmpFileOriginal.path)
-                val filteredUri = Uri.parse(tmpFileFiltered.path)
+                    playerOriginal = MediaPlayer.create(context, originalUri)
+                    playerFiltered = MediaPlayer.create(context, filteredUri)
 
-                playerOriginal = MediaPlayer.create(context, originalUri)
-                playerFiltered = MediaPlayer.create(context, filteredUri)
-                //playerFiltered = MediaPlayer.create(context, originalUri)
-/*
-                playerOriginalViz = Visualizer(0)
-                playerFilteredViz = Visualizer(0)
-                playerOriginalViz.apply {
-                    enabled = true
-                    captureSize = Visualizer.getMaxCaptureRate()
-                }
-                playerFilteredViz.apply {
-                    enabled = true
-                    captureSize = Visualizer.getMaxCaptureRate()
-                }
-
-                playerOriginalViz.setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
-                    override fun onWaveFormDataCapture(
-                        visualizer: Visualizer?,
-                        waveform: ByteArray?,
-                        samplingRate: Int
-                    ) {
-                        var tmp = binding.tvAudioOriginalWv.text.toString() + "/n" + waveform?.get(0).toString()
-                        binding.tvAudioOriginalWv.text = tmp
+                    //Enable Media Controls
+                    setupSeekBar()
+                    if (firstLoad) {
+                        massButtonEnabler()
+                        firstLoad = false
                     }
 
-                    override fun onFftDataCapture(
-                        visualizer: Visualizer?,
-                        fft: ByteArray?,
-                        samplingRate: Int
-                    ) {
-                        var tmp = binding.tvAudioOriginalWv.text.toString() + "/n" + fft?.get(0).toString()
-                        binding.tvAudioOriginalWv.text = tmp
+                    //OnCompletionButtonHandler
+                    playerOriginal.setOnCompletionListener {
+                        if (!it.isLooping)
+                            playPauseMediaPlayer()
                     }
-                }, Visualizer.getMaxCaptureRate(), true, true)
-*/
-                PHeffectA = PresetReverb(1,playerFiltered.audioSessionId)
-                PHeffectA.preset = PresetReverb.PRESET_LARGEHALL
-                PHeffectA.enabled = true
-                playerFiltered.setAuxEffectSendLevel(1f)
 
-                //Enable Media Controls
-                setupSeekBar()
-                if(boolOne) {
-                    massButtonEnabler()
-                    boolOne = false
+                    playerOriginal.setVolume(0f, 0f)
+                    playerFiltered.setVolume(1f, 1f)
                 }
-
-                //OnCompletionButtonHandler
-                playerOriginal.setOnCompletionListener {
-                    if(!it.isLooping)
-                        playPauseMediaPlayer()
-                }
-
-                playerOriginal.setVolume(0f,0f)
-                playerFiltered.setVolume(1f,1f)
             }
-        }
 
         binding.btnLoadFile.setOnClickListener {
             val mIntent = Intent(Intent.ACTION_GET_CONTENT)
             mIntent.type = "audio/*"
-            resultLauncher.launch(Intent.createChooser(mIntent,"Select Audio File"))
+            resultLauncher.launch(Intent.createChooser(mIntent, "Select Audio File"))
         }
 
         binding.btnToggle.setOnTouchListener { it, motionEvent ->
             //playerFiltered.seekTo(playerOriginal.currentPosition)
-            if(motionEvent.action == MotionEvent.ACTION_DOWN) {
+            if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 binding.btnToggle.setColorFilter(resources.getColor(R.color.PHred))
-                playerOriginal.setVolume(1f,1f)
-                playerFiltered.setVolume(0f,0f)
-
-                //MakeToast("Listening to Unfiltered Audio")  //DEBUG
-            } else if(motionEvent.action == MotionEvent.ACTION_UP) {
+                playerOriginal.setVolume(1f, 1f)
+                playerFiltered.setVolume(0f, 0f)
+            } else if (motionEvent.action == MotionEvent.ACTION_UP) {
                 binding.btnToggle.clearColorFilter()
-                playerOriginal.setVolume(0f,0f)
-                playerFiltered.setVolume(1f,1f)
-
-                //MakeToast("Listening to Filtered Audio")    //DEBUG
+                playerOriginal.setVolume(0f, 0f)
+                playerFiltered.setVolume(1f, 1f)
             }
 
             return@setOnTouchListener true
         }
 
         //Media Control
-
         binding.btnApplyFilter.setOnClickListener {
             clearFilteredFile()
 
@@ -298,11 +257,16 @@ class filteringScreenFragment: baseFragment() {
         }
 
         binding.btnBackward.setOnClickListener {
-            seekToMediaPlayer(kotlin.math.max(playerOriginal.currentPosition + 5000,0))
+            seekToMediaPlayer(kotlin.math.max(playerOriginal.currentPosition + 5000, 0))
         }
 
         binding.btnForward.setOnClickListener {
-            seekToMediaPlayer(kotlin.math.min(playerOriginal.currentPosition + 5000,playerOriginal.duration))
+            seekToMediaPlayer(
+                kotlin.math.min(
+                    playerOriginal.currentPosition + 5000,
+                    playerOriginal.duration
+                )
+            )
         }
 
         binding.btnPrevious.setOnClickListener {
@@ -310,12 +274,11 @@ class filteringScreenFragment: baseFragment() {
         }
 
         binding.btnLoop.setOnClickListener {
-            if(isLooping) {
+            if (isLooping) {
                 isLooping = false
                 playerOriginal.isLooping = false
                 playerFiltered.isLooping = false
-            }
-            else {
+            } else {
                 isLooping = true
                 playerOriginal.isLooping = true
                 playerFiltered.isLooping = true
@@ -324,7 +287,7 @@ class filteringScreenFragment: baseFragment() {
 
         binding.lySeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(fromUser)
+                if (fromUser)
                     seekToMediaPlayer(progress)
             }
 
@@ -365,7 +328,7 @@ class filteringScreenFragment: baseFragment() {
                     ),
                     view.sldSlider.max
                 )
-            if(!isEditingParameter) {
+            if (!isEditingParameter) {
                 hideKeyboard()
             }
         }
@@ -389,7 +352,7 @@ class filteringScreenFragment: baseFragment() {
                     ),
                     view.sldSlider.max
                 )
-            if(!isEditingParameter) {
+            if (!isEditingParameter) {
                 hideKeyboard()
             }
         }
@@ -412,7 +375,7 @@ class filteringScreenFragment: baseFragment() {
                     ),
                     view.sldSlider.max
                 )
-            if(!isEditingParameter) {
+            if (!isEditingParameter) {
                 hideKeyboard()
             }
         }
@@ -435,16 +398,19 @@ class filteringScreenFragment: baseFragment() {
                     ),
                     view.sldSlider.max
                 )
-            if(!isEditingParameter) {
+            if (!isEditingParameter) {
                 hideKeyboard()
             }
         }
 
-        binding.lyParameter1.sldSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.lyParameter1.sldSlider.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     binding.lyParameter1.etSliderParameter.clearFocus()
@@ -453,11 +419,14 @@ class filteringScreenFragment: baseFragment() {
             }
         })
 
-        binding.lyParameter2.sldSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.lyParameter2.sldSlider.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     binding.lyParameter2.etSliderParameter.clearFocus()
@@ -466,11 +435,14 @@ class filteringScreenFragment: baseFragment() {
             }
         })
 
-        binding.lyParameter3.sldSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.lyParameter3.sldSlider.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     binding.lyParameter3.etSliderParameter.clearFocus()
@@ -479,11 +451,14 @@ class filteringScreenFragment: baseFragment() {
             }
         })
 
-        binding.lyParameter4.sldSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.lyParameter4.sldSlider.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
+
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     binding.lyParameter4.etSliderParameter.clearFocus()
@@ -496,13 +471,13 @@ class filteringScreenFragment: baseFragment() {
     }
 
     private fun playPauseMediaPlayer() {
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.pause()
             playerFiltered.pause()
             isPlaying = false
             binding.btnPlayPause.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_play_arrow))
         } else {
-            if(playerOriginal.currentPosition == playerOriginal.duration) {
+            if (playerOriginal.currentPosition == playerOriginal.duration) {
                 //Handle Status on Completion
                 seekToMediaPlayer(0)
             }
@@ -516,7 +491,6 @@ class filteringScreenFragment: baseFragment() {
     private fun seekToMediaPlayer(newPosition: Int) {
         playerOriginal.seekTo(newPosition)
         playerFiltered.seekTo(playerOriginal.currentPosition)
-        //binding.tvCurrent.text = timeStringMaker(playerOriginal.currentPosition)
     }
 
     private fun setupSeekBar() {
@@ -524,17 +498,17 @@ class filteringScreenFragment: baseFragment() {
         binding.tvDuration.text = timeStringMaker(playerOriginal.duration)
 
         val seekBarHandler = Handler()
-        seekBarHandler.postDelayed( object : Runnable {
+        seekBarHandler.postDelayed(object : Runnable {
             override fun run() {
                 binding.lySeekbar.progress = playerOriginal.currentPosition
                 binding.tvCurrent.text = timeStringMaker(binding.lySeekbar.progress)
-                seekBarHandler.postDelayed(this,300)
+                seekBarHandler.postDelayed(this, 300)
             }
         }, 0)
     }
 
     private fun massButtonEnabler() {
-        if(binding.btnPlayPause.isClickable) {
+        if (binding.btnPlayPause.isClickable) {
             binding.btnPlayPause.isClickable = false
             binding.btnPlayPause.alpha = 0.3f
 
@@ -544,7 +518,7 @@ class filteringScreenFragment: baseFragment() {
             binding.btnBackward.isClickable = false
             binding.btnBackward.alpha = 0.3f
 
-            if(isLooping) {
+            if (isLooping) {
                 binding.btnLoop.performClick()
             }
             binding.btnLoop.isClickable = false
@@ -587,12 +561,12 @@ class filteringScreenFragment: baseFragment() {
     }
 
     private fun timeStringMaker(timeStamp: Int): String {
-        val minute = timeStamp/1000/60
-        val second = timeStamp/1000%60
+        val minute = timeStamp / 1000 / 60
+        val second = timeStamp / 1000 % 60
 
         val minuteString = minute.toString()
         var secondString = second.toString()
-        if (second<10)
+        if (second < 10)
             secondString = "0$secondString"
 
         return ("$minuteString:$secondString")
@@ -601,7 +575,7 @@ class filteringScreenFragment: baseFragment() {
     override fun onPause() {
         super.onPause()
 
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.pause()
             playerFiltered.pause()
         }
@@ -610,24 +584,32 @@ class filteringScreenFragment: baseFragment() {
     override fun onResume() {
         super.onResume()
 
-        if(isPlaying) {
+        if (isPlaying) {
             playerOriginal.start()
             playerFiltered.start()
         }
     }
 
     fun prepFiles() {
-        val mainPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+        val mainPath =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .toString()
         val extension = ".wav"
         //CreateDestinationFiles
-        tmpFileOriginal = File(mainPath + "/"
-                + "Original" + extension)
-        tmpFileFiltered = File(mainPath + "/"
-                + "Filter-Results" + extension)
+        tmpFileOriginal = File(
+            mainPath + "/"
+                    + "Original"
+                    + extension
+        )
+        tmpFileFiltered = File(
+            mainPath + "/"
+                    + "Filter-Results"
+                    + extension
+        )
 
-        if(tmpFileOriginal.exists())
+        if (tmpFileOriginal.exists())
             tmpFileOriginal.delete()
-        if(tmpFileFiltered.exists())
+        if (tmpFileFiltered.exists())
             tmpFileFiltered.delete()
 
         tmpFileOriginal.createNewFile()
@@ -635,7 +617,7 @@ class filteringScreenFragment: baseFragment() {
     }
 
     fun clearFilteredFile() {
-        if(tmpFileFiltered.exists())
+        if (tmpFileFiltered.exists())
             tmpFileFiltered.delete()
         outputFile = RandomAccessFile(tmpFileFiltered.path, "rw")
     }
@@ -695,45 +677,6 @@ class filteringScreenFragment: baseFragment() {
         }
     }
 
-    private fun decode(input : InputStream) {
-        val output = ArrayList<Short>(1024)
-        val bitstream = Bitstream(input)
-        val decoder = javazoom.jl.decoder.Decoder()
-        var total_ms = 0f
-        var nextNotify = -1f
-        while (true) {
-            val frameHeader: javazoom.jl.decoder.Header? = bitstream.readFrame()
-            if (frameHeader == null) {
-                break
-            } else {
-                total_ms += frameHeader.ms_per_frame()
-                val buffer: SampleBuffer =
-                    decoder.decodeFrame(frameHeader, bitstream) as SampleBuffer // CPU intense
-                val pcm: ShortArray = buffer.buffer
-                var i = 0
-                while (i < pcm.size - 1) {
-                    val l = pcm[i]
-                    val r = pcm[i + 1]
-                    val mono = ((l + r) / 2f).toInt().toShort()
-                    output.add(mono) // RAM intense
-                    i += 2
-                }
-                pcmArray = pcm
-            }
-            bitstream.closeFrame()
-        }
-        bitstream.close()
-        val monoSamples = ShortArray(pcmArray.size / 2)
-        val HEADER_LENGTH = 22
-        var k = 0
-        for (i in monoSamples.indices) {
-            if (k > HEADER_LENGTH) {
-                monoSamples[i] = ((pcmArray[i * 2] + pcmArray[i * 2 + 1]) / 2).toShort()
-            }
-            k++
-        }
-    }
-
     fun createFileFromStream(ins: InputStream, destination1: File?) {
         try {
             FileOutputStream(destination1).use { os ->
@@ -750,8 +693,7 @@ class filteringScreenFragment: baseFragment() {
         }
     }
 
-    fun setupAudio(oriFile : File, fCut : Float) {
-
+    fun setupAudio(oriFile: File, fCut: Float) {
         val fs = mediaFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE).toFloat()
         val channel = mediaFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
 
@@ -759,14 +701,12 @@ class filteringScreenFragment: baseFragment() {
 
         val inputStream = FileInputStream(oriFile)
 
-        val audioStream = UniversalAudioInputStream(inputStream,audioFormat)
-        val audioDispatcher = AudioDispatcher(audioStream,mBufferSize,mOverlap)
+        val audioStream = UniversalAudioInputStream(inputStream, audioFormat)
+        val audioDispatcher = AudioDispatcher(audioStream, mBufferSize, mOverlap)
 
-        audioDispatcher.addAudioProcessor(LowPassFS(fCut,fs))
+        audioDispatcher.addAudioProcessor(LowPassFS(fCut, fs))
         audioDispatcher.addAudioProcessor(WriterProcessor(audioFormat, outputFile))
         audioDispatcher.run()
-
-        val audioThread = Thread(audioDispatcher, "Audio Thread")
 
         return
     }
