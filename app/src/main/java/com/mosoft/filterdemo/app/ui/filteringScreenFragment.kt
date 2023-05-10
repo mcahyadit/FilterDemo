@@ -81,32 +81,6 @@ class filteringScreenFragment: baseFragment() {
         binding.lyParameter3.root.visibility = View.GONE
         binding.lyParameter4.root.visibility = View.GONE
 
-        val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                binding.btnRightMenuClose.performClick()
-            }
-        }
-
-        //requireActivity().onBackPressedDispatcher.addCallback(this,callback)
-
-        //requireActivity().onBackPressedDispatcher.OnBackPressedCallback(false)
-
-        //CreateDestinationFiles
-        tmpFileOriginal = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
-                + "/"
-                + ""
-                + "Original.wav")
-        if(tmpFileOriginal.exists())
-            tmpFileOriginal.delete()
-        tmpFileOriginal.createNewFile()
-        tmpFileFiltered = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
-                + "/"
-                + ""
-                + "Filter-Results.wav")
-        if(tmpFileFiltered.exists())
-            tmpFileFiltered.delete()
-        outputFile = RandomAccessFile(tmpFileFiltered.path, "rw")
-
         binding.btnShowMenu.setOnClickListener {
             if(it.isClickable) {
                 binding.btnShowMenu.isClickable = false
@@ -186,32 +160,69 @@ class filteringScreenFragment: baseFragment() {
             binding.btnRightMenuClose.performClick()
         }
 
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if(binding.lyRightMenuMaster.visibility == View.VISIBLE)
+                    binding.btnRightMenuClose.performClick()
+                else
+                    findNavController().popBackStack()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,callback)
+
         //Player
 
         val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                Log.d("DEBUG HERE", "mUri Read")
                 val mUri : Uri = result.data?.data!!
 
-                Log.d("DEBUG HERE", "crate file")
+                prepFiles()
                 createFileFromStream(requireContext().contentResolver.openInputStream(mUri)!!,tmpFileOriginal)
-                Log.d("DEBUG HERE", "crate file done")
 
                 mediaExtractor = MediaExtractor()
                 mediaExtractor.setDataSource(tmpFileOriginal.path)
                 mediaFormat = mediaExtractor.getTrackFormat(0)
-                Log.d("DEBUG HERE", "medexctr don")
 
-                //setupAudio(tmpFileOriginal, 800f)
-                Log.d("DEBUG HERE", "setup audio don")
+                setupAudio(tmpFileOriginal, 500f)
 
                 val originalUri = Uri.parse(tmpFileOriginal.path)
                 val filteredUri = Uri.parse(tmpFileFiltered.path)
 
                 playerOriginal = MediaPlayer.create(context, originalUri)
-                //playerFiltered = MediaPlayer.create(context, filteredUri)
-                playerFiltered = MediaPlayer.create(context, originalUri)
+                playerFiltered = MediaPlayer.create(context, filteredUri)
+                //playerFiltered = MediaPlayer.create(context, originalUri)
+/*
+                playerOriginalViz = Visualizer(0)
+                playerFilteredViz = Visualizer(0)
+                playerOriginalViz.apply {
+                    enabled = true
+                    captureSize = Visualizer.getMaxCaptureRate()
+                }
+                playerFilteredViz.apply {
+                    enabled = true
+                    captureSize = Visualizer.getMaxCaptureRate()
+                }
 
+                playerOriginalViz.setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
+                    override fun onWaveFormDataCapture(
+                        visualizer: Visualizer?,
+                        waveform: ByteArray?,
+                        samplingRate: Int
+                    ) {
+                        var tmp = binding.tvAudioOriginalWv.text.toString() + "/n" + waveform?.get(0).toString()
+                        binding.tvAudioOriginalWv.text = tmp
+                    }
+
+                    override fun onFftDataCapture(
+                        visualizer: Visualizer?,
+                        fft: ByteArray?,
+                        samplingRate: Int
+                    ) {
+                        var tmp = binding.tvAudioOriginalWv.text.toString() + "/n" + fft?.get(0).toString()
+                        binding.tvAudioOriginalWv.text = tmp
+                    }
+                }, Visualizer.getMaxCaptureRate(), true, true)
+*/
                 PHeffectA = PresetReverb(1,playerFiltered.audioSessionId)
                 PHeffectA.preset = PresetReverb.PRESET_LARGEHALL
                 PHeffectA.enabled = true
@@ -263,7 +274,23 @@ class filteringScreenFragment: baseFragment() {
         //Media Control
 
         binding.btnApplyFilter.setOnClickListener {
-            //massButtonEnabler()
+            clearFilteredFile()
+
+            setupAudio(tmpFileOriginal, binding.lyParameter1.sldSlider.progress.toFloat())
+
+            val filteredUri = Uri.parse(tmpFileFiltered.path)
+
+            if (isPlaying) {
+                playPauseMediaPlayer()
+                playerFiltered.reset()
+                playerFiltered = MediaPlayer.create(context, filteredUri)
+                playerFiltered.seekTo(playerOriginal.currentPosition)
+                playPauseMediaPlayer()
+            } else {
+                playerFiltered.reset()
+                playerFiltered = MediaPlayer.create(context, filteredUri)
+                playerFiltered.seekTo(playerOriginal.currentPosition)
+            }
         }
 
         binding.btnPlayPause.setOnClickListener {
@@ -589,6 +616,30 @@ class filteringScreenFragment: baseFragment() {
         }
     }
 
+    fun prepFiles() {
+        val mainPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+        val extension = ".wav"
+        //CreateDestinationFiles
+        tmpFileOriginal = File(mainPath + "/"
+                + "Original" + extension)
+        tmpFileFiltered = File(mainPath + "/"
+                + "Filter-Results" + extension)
+
+        if(tmpFileOriginal.exists())
+            tmpFileOriginal.delete()
+        if(tmpFileFiltered.exists())
+            tmpFileFiltered.delete()
+
+        tmpFileOriginal.createNewFile()
+        outputFile = RandomAccessFile(tmpFileFiltered.path, "rw")
+    }
+
+    fun clearFilteredFile() {
+        if(tmpFileFiltered.exists())
+            tmpFileFiltered.delete()
+        outputFile = RandomAccessFile(tmpFileFiltered.path, "rw")
+    }
+
     @Subscribe
     fun adjustSliders(event: Events.filterListItemOnClick) {
         currentFilterId = event.data.id
@@ -658,7 +709,7 @@ class filteringScreenFragment: baseFragment() {
                 total_ms += frameHeader.ms_per_frame()
                 val buffer: SampleBuffer =
                     decoder.decodeFrame(frameHeader, bitstream) as SampleBuffer // CPU intense
-                val pcm: ShortArray = buffer.getBuffer()
+                val pcm: ShortArray = buffer.buffer
                 var i = 0
                 while (i < pcm.size - 1) {
                     val l = pcm[i]
@@ -707,12 +758,12 @@ class filteringScreenFragment: baseFragment() {
         val audioFormat = TarsosDSPAudioFormat(fs, 16, channel, false, false)
 
         val inputStream = FileInputStream(oriFile)
+
         val audioStream = UniversalAudioInputStream(inputStream,audioFormat)
         val audioDispatcher = AudioDispatcher(audioStream,mBufferSize,mOverlap)
-        val writer = WriterProcessor(audioFormat, outputFile)
 
         audioDispatcher.addAudioProcessor(LowPassFS(fCut,fs))
-        audioDispatcher.addAudioProcessor(writer)
+        audioDispatcher.addAudioProcessor(WriterProcessor(audioFormat, outputFile))
         audioDispatcher.run()
 
         val audioThread = Thread(audioDispatcher, "Audio Thread")
